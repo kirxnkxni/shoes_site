@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CART</title>
+  <meta name="description"
+    content="Shop the latest collection of stylish, comfortable, and affordable shoes online. Discover sneakers, formal shoes, sandals, and more with fast delivery and secure checkout." />
+  <meta name="author" content="kiran k" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body class="log-body">
+  <div class="d-flex justify-content-center mt-5">
+    <h1 class="cart-head">Cart</h1>
+  </div>
+  <!-- for loop -->
+  <div>
+    <div class="row mt-5 ms-5 me-5 mb-5">
+      <div class="col-2">
+        <div>
+          <p>h</p>
+        </div>
+      </div>
+      <div class="col-4">
+        <p class="cart-p">product</p>
+      </div>
+      <div class="col-2">
+        <p class="cart-p">price</p>
+      </div>
+      <div class="col-2">
+        <p class="cart-p">qty</p>
+      </div>
+      <div class="col-2 ">
+        <p class="cart-p">total</p>
+      </div>
+    </div>
+  </div>
+  
+   <div class="cart-design">
+    <div class="row mt-5 ms-5 me-5 mb-5">
+      <div class="col-2">
+        <div>
+          <p></p>
+        </div>
+        <div>
+          <button type="" class="cart-remove-btn">remove</button>
+        </div>
+      </div>
+      <div class="col-4">
+        <div>
+          <img src="" alt="product" height="50" width="50">
+        </div>
+      </div>
+      <div class="col-2">
+        <div>
+
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="d-flex">
+          <button class="cart-count-button">-</button>
+          <div class="">
+            <p class="cart-qty ms-1 me-1 ">1</p>
+          </div>
+          <button class="cart-count-button">+</button>
+        </div>
+      </div>
+        <div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+{% endblock %}

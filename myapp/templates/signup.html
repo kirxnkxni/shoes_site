@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sign up</title>
+  <meta name="description"
+    content="Shop the latest collection of stylish, comfortable, and affordable shoes online. Discover sneakers, formal shoes, sandals, and more with fast delivery and secure checkout." />
+  <meta name="author" content="kiran k" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+
+<body class="log-body">
+  <div class="container min-vh-100 d-flex justify-content-center align-items-center log-border">
+    <div class="log-div mt-5 mb-5">
+      <div class="log-cont">
+        <form action="login" method="post">
+          <ul class="log-ul">
+            <li>
+              <p class="log-p mb-5">SIGN <span>UP</span></p>
+            </li>
+            <li >
+              <input type="text" id="firstname" name="firstusername" placeholder="first name" class="log-inp mt-3 ">
+            </li>
+            <li>
+              <input type="text" id="lastname" name="firstname" placeholder="last name" class="log-inp mt-3 mb-5">
+            </li>
+             <li>
+              <input type="email" id="mail" name="user mail" placeholder="email" class="log-inp mt-3">
+            </li>
+            <li>
+              <input type="password" id="pass" name="password" placeholder="password" class="log-inp mt-3 ">
+            </li>
+            <li>
+              <input type="password" id="confmpass" name="confmpassword" placeholder="confirm password" class="log-inp mt-3 mb-5 ">
+            </li>
+            <!-- <li class="mb-5 ms-3 ">
+              <input type="checkbox" id="remember" name="rememberme" class="log-check">
+              <label for="checkbox" style="color: azure;">i agree to the <a href="">terms and conditions</a></label>
+            </li> -->
+            <li>
+              <button class="log-button px-5 py-2 ms-4 mb-5">submit</button>
+            </li>
+          </ul>
+          <p class="sign-p">already have an account?
+            <span>
+              <a href="">sign up</a>
+            </span>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+
+{% endblock %}
