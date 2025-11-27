@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import random
 from django.http import JsonResponse
+from django.contrib.auth.hashers import make_password
 
 # Create your views here.
 def header(req):
@@ -70,6 +71,9 @@ def verify_otp(request):
 
         otp_obj = EmailOtp.objects.filter(email=email).order_by("-created_time").first()
 
+        if not email:
+            return JsonResponse({'message':'session expired'})
+
         if not otp_entered:
             return JsonResponse({"message": "Please enter OTP"})
 
@@ -77,12 +81,36 @@ def verify_otp(request):
             return JsonResponse({"message": "OTP verified!"})
         else:
             return JsonResponse({"message": "Invalid OTP!"})
+        
+    return JsonResponse({"message": "Invalid request method"})
 
+        
+def change_password(req):
+    if req.method=="POST":
+        new_pass=req.POST.get("newpassword")
+        conf_pass=req.POST.get("confirmpassword")
+        email=req.session.get("reset_email")
+
+        if not new_pass or not conf_pass:
+            return JsonResponse({'message':'please fill the fields'})
+        
+        if new_pass != conf_pass:
+            return JsonResponse({'message':'password do not match'})
+        
+        if len(new_pass)<6 :
+            return JsonResponse({'message':'password must be atleast 6 character'})
+        
+        try:
+            user_obj=User.objects.get(email=email)
+            user_obj.password=make_password(new_pass)
+            user_obj.save()
+            req.session.pop('reset_email',None)
+            return JsonResponse({'message':'password changed successfully'})
+        except User.DoesNotExist:
+            return JsonResponse({'message':"user not found!"})
 
 def reset(req):
     return render(req,'reset.html')
-
-
 
 def signup(req):
     return render(req,'signup.html')
