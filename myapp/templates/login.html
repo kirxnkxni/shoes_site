@@ -28,39 +28,106 @@
 
       </div>
       <div class="col-lg log-cont">
-        <form action="login" method="post">
+        <form id='login-form' action="" method="post">
+          {% csrf_token %}
           <ul class="log-ul">
             <li>
               <p class="log-p mb-5">LOG <span>IN</span></p>
             </li>
             <li >
-              <input type="text" id="name" name="username" placeholder="username" class="log-inp mt-3 ">
+              <input type="text" id="username" name="username" placeholder="user-email" class="log-inp mt-3 ">
             </li>
             <li>
-              <input type="password" id="pass" name="password" placeholder="password" class="log-inp mt-3 mb-3 ">
+              <input type="password" id="password" name="password" placeholder="password" class="log-inp mt-3 mb-3 ">
             </li>
             <li class="mb-5 ms-3 ">
-              <input type="checkbox" id="remember" name="rememberme" class="log-check">
-              <label for="checkbox" style="color: azure;">remember me</label>
+              <input type="checkbox" id="remember" name="remember" class="log-check">
+              <label for="remember" style="color: azure;">remember me</label>
             </li>
             <li>
-              <button class="log-button px-5 py-2 ms-4 mb-5">login</button>
+              <button class="log-button px-5 py-2 ms-4 mb-5" type="submit">login</button>
             </li>
           </ul>
           <p>
             <span class="me-1">
-              <a href="">forgot password?</a>
+              <a href="{% url 'forgot' %}">forgot password?</a>
             </span>
             <span class="ms-5">
-              <a href="">sign up</a>
+              <a href="{% url 'signup' %}">sign up</a>
             </span>
           </p>
         </form>
       </div>
     </div>
   </div>
-</body>
+  
+  <!----------------------------------- modal ----------------------------------------------->
 
+
+  <div class="modal fade" id="otpModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body" id="otpMessage">
+        message
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ----------------------------------login verification---------------------------------------------- -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("login-form").addEventListener("submit",login_verification);
+
+  function getCSRF()
+  {
+    return document.querySelector('input[name=csrfmiddlewaretoken]').value
+  }
+  function showmodal(msg)
+  {
+    document.getElementById('otpMessage').innerText=msg;
+    const modal= new bootstrap.Modal(document.getElementById('otpModal'));
+    modal.show();
+    setTimeout( () => {
+      modal.hide();
+    },1000);
+  }
+  function login_verification(e)
+  {
+    e.preventDefault();
+
+    const form=document.getElementById('login-form')
+    let formdata= new FormData(form)
+
+    fetch("{% url 'login' %}",{
+       method:'POST',
+       headers:{"X-CSRFToken": getCSRF() },
+       body:formdata
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);   //added line
+      showmodal(data.message);
+
+    if (data.status === "success")
+    {
+      console.log("Redirecting to home...");
+      setTimeout(()=>{
+        window.location.href="{% url 'home' %}";
+      },1000);
+    }
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+        showmodal("Server error!");
+    });
+  }
+});
+
+</script>
+
+</body>
 </html>
 
 {% endblock %}

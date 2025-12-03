@@ -4,7 +4,9 @@ from django.core.mail import send_mail
 from django.conf import settings
 import random
 from django.http import JsonResponse
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password,check_password
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your views here.
 def header(req):
@@ -24,7 +26,39 @@ def get_data(req):
 def contact(req):
     return render(req,'contact.html')
 
+# =======================================login==============================================================================
+
 def login(req):
+    if req.method == 'POST':
+        try:
+            email=req.POST.get('username')
+            entered_pass=req.POST.get('password')
+            remember=req.POST.get('remember')
+
+            if not email or not entered_pass:
+                return JsonResponse({'status':"fill",'message':'please fill the fields'})
+
+            try:
+                user_obj = User.objects.get(email=email)
+            except User.DoesNotExist: 
+                return JsonResponse({'status':"nouser",'message':'invalid user!'})
+            
+            if not check_password(entered_pass,user_obj.password):
+                return JsonResponse({'status':"invalid",'message':"invalid username or password"})
+            
+            req.session['user_id']=user_obj.id
+
+            if remember:
+                req.session.set_expiry(60 * 60 * 24 * 15)
+            else:
+                req.session.set_expiry(0)
+
+            return JsonResponse({'status':"success",'message':'login successful'})
+
+        except Exception as e:
+            print("LOGIN ERROR:", e)
+            return JsonResponse({'status': "error", 'message': 'Something went wrong!'})            
+    
     return render(req,'login.html')
 
 # ==================================== forgot forgot_password ================================================ #
