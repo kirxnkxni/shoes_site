@@ -17,8 +17,8 @@ class User(models.Model):
     user=models.CharField(max_length=50)
     email=models.EmailField(max_length=100,unique=True)
     password=models.CharField(max_length=50)
-    location=models.CharField(max_length=100)
-    contactno=models.CharField(max_length=20)
+    # location=models.CharField(max_length=100)
+    # contactno=models.CharField(max_length=20)
 
     def __str__(self):
         return self.user

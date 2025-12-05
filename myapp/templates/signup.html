@@ -25,25 +25,26 @@
   <div class="container min-vh-100 d-flex justify-content-center align-items-center log-border">
     <div class="log-div mt-5 mb-5">
       <div class="log-cont">
-        <form action="login" method="post">
+        <form id="sign-up_form" method="post">
+          {% csrf_token %}
           <ul class="log-ul">
             <li>
               <p class="log-p mb-5">SIGN <span>UP</span></p>
             </li>
             <li >
-              <input type="text" id="firstname" name="firstusername" placeholder="first name" class="log-inp mt-3 ">
+              <input type="text" id="firstname" name="firstname" placeholder="first name" class="log-inp mt-3 ">
             </li>
             <li>
-              <input type="text" id="lastname" name="firstname" placeholder="last name" class="log-inp mt-3 mb-5">
+              <input type="text" id="lastname" name="lastname" placeholder="last name" class="log-inp mt-3 mb-5">
             </li>
              <li>
-              <input type="email" id="mail" name="user mail" placeholder="email" class="log-inp mt-3">
+              <input type="email" id="mail" name="usermail" placeholder="email" class="log-inp mt-3">
             </li>
             <li>
               <input type="password" id="pass" name="password" placeholder="password" class="log-inp mt-3 ">
             </li>
             <li>
-              <input type="password" id="confmpass" name="confmpassword" placeholder="confirm password" class="log-inp mt-3 mb-5 ">
+              <input type="password" id="confirmpass" name="confirmpass" placeholder="confirm password" class="log-inp mt-3 mb-5 ">
             </li>
             <!-- <li class="mb-5 ms-3 ">
               <input type="checkbox" id="remember" name="rememberme" class="log-check">
@@ -62,6 +63,66 @@
       </div>
     </div>
   </div>
+
+  <!----------------------------------- modal ----------------------------------------------->
+
+
+  <div class="modal fade" id="otpModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body" id="otpMessage">
+        message
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!----------------------------------- sign-up ----------------------------------------------->
+
+
+<script>
+      document.getElementById("sign-up_form").addEventListener("submit",sign_up);
+  function getcsrf(){
+    return document.querySelector('input[name=csrfmiddlewaretoken]').value
+  }
+  function showmodal(msg){
+    document.getElementById("otpMessage").innerText =msg;
+    const modal= new bootstrap.Modal(document.getElementById("otpModal"));
+    modal.show();
+    setTimeout(()=>{
+      modal.hide();
+    },1000);
+  }
+  function sign_up(e){
+
+    e.preventDefault();
+    
+    const form = document.getElementById("sign-up_form")
+    let formdata= new FormData(form)
+
+    fetch("{% url 'signup' %}",{
+      method:'POST',
+      headers:{"X-CSRFToken":getcsrf()},
+      body:formdata
+    })
+    .then(res => res.json())
+    .then(data => {
+      showmodal(data.message);
+
+      if (data.status == "success")
+    {
+      setTimeout( () => {
+        window.location.href="{% url 'login' %}";
+      },1000);
+    }
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+        showmodal("Server error!");
+    });
+  }
+</script>
 </body>
 
 </html>

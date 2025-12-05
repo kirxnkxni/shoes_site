@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password,check_password
 from django.utils import timezone
 from datetime import timedelta
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 
 # Create your views here.
 def header(req):
@@ -146,7 +148,40 @@ def change_password(req):
 def reset(req):
     return render(req,'reset.html')
 
+# =======================================================signup===================================================================
+
 def signup(req):
+    if req.method == 'POST':
+       first_name=req.POST.get('firstname')
+       last_name=req.POST.get('lastname')
+       email=req.POST.get('usermail')
+       password=req.POST.get('password')
+       confirm_password=req.POST.get('confirmpass')
+
+       if not first_name or not last_name or not email or not password or not confirm_password:
+            return JsonResponse({'status':'fill','message':'please fill the fields'})
+       
+       user_name=first_name + " " + last_name
+
+       try:
+            validate_email(email)
+       except ValidationError:
+            return JsonResponse({'status':'email_valid','message':'enter a valid email'})
+       
+       if User.objects.filter(email=email).exists():
+            return JsonResponse({'status':'user_exist','message':'user already exists'})
+       
+       if password != confirm_password:
+            return JsonResponse({'status':'invalid_pass','message':'passwords do not match'})
+       else:
+            save_pass=make_password(password)
+
+       User.objects.create(
+            user=user_name,
+            email=email,
+            password=save_pass,
+        )
+       return JsonResponse({'status':'success','message':'sign-up successful'})
     return render(req,'signup.html')
 
 def cart(req):
