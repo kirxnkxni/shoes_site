@@ -16,7 +16,7 @@ class Product(models.Model):
 class User(models.Model):
     user=models.CharField(max_length=50)
     email=models.EmailField(max_length=100,unique=True)
-    password=models.CharField(max_length=50)
+    password=models.CharField(max_length=255)
     # location=models.CharField(max_length=100)
     # contactno=models.CharField(max_length=20)
 
@@ -39,3 +39,14 @@ class EmailOtp(models.Model):
 
     def __str__(self):
         return f"{self.otp}"
+    
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    gender = models.CharField(max_length=10, blank=True)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    address = models.TextField(blank=True)
+    image = models.FileField(upload_to='profile_images/', default='profile_images/default.png')
+
+    def __str__(self):
+        return self.user.user

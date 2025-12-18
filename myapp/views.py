@@ -184,6 +184,84 @@ def signup(req):
        return JsonResponse({'status':'success','message':'sign-up successful'})
     return render(req,'signup.html')
 
+
+# =============================================profile=============================================================
+
+def profile(req):
+    # Check if user is logged in
+    user_id = req.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+    
+    # Get user
+    user = User.objects.get(id=user_id)
+    
+    # Get or create profile
+    profile_obj, created = Profile.objects.get_or_create(user=user)
+    
+    return render(req, 'profile.html', {
+        'user': user,
+        'profile': profile_obj
+    })
+
+
+#===================================logout=============================================
+
+def logout(req):
+    req.session.flush()  # Clear all session data
+    return redirect('login')
+
+#===========================================================edit_profile===============================================================
+
+def edit_profile(req):
+    # Check if user is logged in
+    user_id = req.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+    
+    user = User.objects.get(id=user_id)
+    profile_obj, created = Profile.objects.get_or_create(user=user)
+    
+    if req.method == 'POST':
+        try:
+            # Get form data
+            full_name = req.POST.get('fullname')
+            gender = req.POST.get('gender')
+            age = req.POST.get('age')
+            phone = req.POST.get('phone')
+            address = req.POST.get('address')
+            profile_image = req.FILES.get('profile_image')
+            
+            # Update user name
+            if full_name:
+                user.user = full_name
+                user.save()
+            
+            # Update profile
+            if gender:
+                profile_obj.gender = gender
+            if age:
+                profile_obj.age = age
+            if phone:
+                profile_obj.phone = phone
+            if address:
+                profile_obj.address = address
+            if profile_image:
+                profile_obj.image = profile_image
+            
+            profile_obj.save()
+            
+            return JsonResponse({'status': 'success', 'message': 'Profile updated successfully'})
+        
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return render(req, 'edit_profile.html', {
+        'user': user,
+        'profile': profile_obj
+    })
+
+# =====================================cart=====================================================
 def cart(req):
     return render(req,'cart.html')
 
@@ -193,8 +271,6 @@ def checkout(req):
 def order_summary(req):
     return render(req,'order_summary.html')
 
-def profile(req):
-    return render(req,'profile.html')
 
 def product_details(req):
     return render(req,'product_details.html')
