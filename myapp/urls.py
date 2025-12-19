@@ -15,10 +15,14 @@ urlpatterns = [
     path('change_password/',views.change_password,name='change_password'),
     path('signup/',views.signup,name='signup'),
     path('cart/',views.cart,name='cart'),
+    path('add_to_cart/<int:product_id>/',views.add_to_cart,name='add_to_cart'),
+    path('update_cart_quantity/',views.update_cart_quantity,name='update_cart_quantity'), 
+    path('remove_from_cart/',views.remove_from_cart,name='remove_from_cart'), 
     path('checkout/',views.checkout,name='checkout'),
     path('order_summary/',views.order_summary,name='order_summary'),
     path('profile/',views.profile,name='profile'),
     path('edit_profile/',views.edit_profile,name='edit_profile'),
     path('add_account/',views.add_account,name='add_account'),  
-    path('product_details/',views.product_details,name='prod_details')
+    path('product_details/',views.product_details,name='prod_details'),
+    path('shop/',views.shop,name='shop')
 ] 

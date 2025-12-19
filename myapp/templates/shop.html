@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+{% csrf_token %}
+
+<!-- category section -->
+<nav class="shadow">
+  <div style="margin-top: 5rem;">
+    <ul class="nav justify-content-center">
+      <li class="nav-item">
+        <button class="cat-but" onclick="filterProducts('male')">Men</button>
+      </li>
+      <li class="nav-item">
+        <button class="cat-but" onclick="filterProducts('female')">Women</button>
+      </li>
+      <li class="nav-item">
+        <button class="cat-but" onclick="filterProducts('kids')">Kids</button>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- cards -->
+<div class="row row-cols-1 row-cols-md-4 g-4 mt-2 mb-5">
+  {% for product in result %}
+  <div class="col product" data-category="{{ product.category|lower }}">
+    <div class="card h-100">
+      <img src="{{ product.image.url }}" class="card-img-top" alt="product" height="350">
+      <div class="card-body">
+        <h5 class="card-title">{{ product.name }}</h5>
+        <h5>₹{{ product.price }}</h5>
+        <button onclick="addToCart('{{ product.id }}')"
+                class="btn btn-primary w-100 mt-2">
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  const products = document.querySelectorAll(".product");
+
+  function filterProducts(category) {
+    products.forEach(product => {
+      product.style.display =
+        product.dataset.category === category ? "block" : "none";
+    });
+  }
+
+  function getCSRF() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+  }
+
+  function addToCart(productId) {
+    fetch("{% url 'add_to_cart' 0 %}".replace('0', productId), {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCSRF()
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        alert(data.message);
+      } else if (data.status === 'error' && data.message === 'Please login first') {
+        alert('Please login to add items to cart');
+        window.location.href = "{% url 'login' %}";
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Something went wrong!');
+    });
+  }
+</script>
+
+{% endblock %}

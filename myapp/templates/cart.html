@@ -22,67 +22,243 @@
 </head>
 
 <body class="log-body">
-  <div class="d-flex justify-content-center mt-5">
-    <h1 class="cart-head">Cart</h1>
-  </div>
-  <!-- for loop -->
-  <div>
-    <div class="row mt-5 ms-5 me-5 mb-5">
-      <div class="col-2">
-        <div>
-          <p>h</p>
-        </div>
-      </div>
-      <div class="col-4">
-        <p class="cart-p">product</p>
-      </div>
-      <div class="col-2">
-        <p class="cart-p">price</p>
-      </div>
-      <div class="col-2">
-        <p class="cart-p">qty</p>
-      </div>
-      <div class="col-2 ">
-        <p class="cart-p">total</p>
-      </div>
+  <div class="container">
+    <div class="d-flex justify-content-center mt-5">
+      <h1 class="cart-head">Shopping Cart</h1>
     </div>
-  </div>
-  
-   <div class="cart-design">
-    <div class="row mt-5 ms-5 me-5 mb-5">
-      <div class="col-2">
-        <div>
-          <p></p>
-        </div>
-        <div>
-          <button type="" class="cart-remove-btn">remove</button>
-        </div>
-      </div>
-      <div class="col-4">
-        <div>
-          <img src="" alt="product" height="50" width="50">
-        </div>
-      </div>
-      <div class="col-2">
-        <div>
 
-        </div>
+    {% if cart_items %}
+    <!-- Cart Header -->
+    <div class="row mt-5 ms-5 me-5 mb-3">
+      <div class="col-2"></div>
+      <div class="col-4">
+        <p class="cart-p">Product</p>
       </div>
-      <div class="col-2">
-        <div class="d-flex">
-          <button class="cart-count-button">-</button>
-          <div class="">
-            <p class="cart-qty ms-1 me-1 ">1</p>
+      <div class="col-2 text-center">
+        <p class="cart-p">Price</p>
+      </div>
+      <div class="col-2 text-center">
+        <p class="cart-p">Quantity</p>
+      </div>
+      <div class="col-2 text-center">
+        <p class="cart-p">Total</p>
+      </div>
+    </div>
+
+    <!-- Cart Items -->
+    {% for item in cart_items %}
+    <div class="cart-design" id="cart-item-{{ item.id }}">
+      <div class="row mt-4 ms-5 me-5 mb-4 align-items-center">
+        <!-- Remove Button -->
+        <div class="col-2 text-center">
+          <button type="button" class="cart-remove-btn" onclick="removeFromCart('{{ item.id }}')">Remove</button>
+        </div>
+
+        <!-- Product Image & Name -->
+        <div class="col-4">
+          <div class="d-flex align-items-center">
+            <img src="{{ item.Product.image.url }}" alt="product" height="80" width="80" style="border-radius: 10px; object-fit: cover;">
+            <div class="ms-3">
+              <p style="color: white; margin: 0; font-weight: bold;">{{ item.Product.name }}</p>
+              <p style="color: #ccc; margin: 0; font-size: 14px;">{{ item.Product.brand }}</p>
+            </div>
           </div>
-          <button class="cart-count-button">+</button>
+        </div>
+
+        <!-- Price -->
+        <div class="col-2 text-center">
+          <p style="color: white; margin: 0;">₹{{ item.Product.price }}</p>
+        </div>
+
+        <!-- Quantity Controls -->
+        <div class="col-2">
+          <div class="d-flex justify-content-center align-items-center">
+            <button class="cart-count-button" onclick="updateQuantity('{{ item.id }}','decrease')">-</button>
+            <p class="cart-qty ms-2 me-2 mb-0" id="qty-{{ item.id }}">{{ item.qty }}</p>
+            <button class="cart-count-button" onclick="updateQuantity('{{ item.id }}', 'increase')">+</button>
+          </div>
+        </div>
+
+        <!-- Item Total -->
+        <div class="col-2 text-center">
+          <p style="color: white; margin: 0; font-weight: bold;" id="item-total-{{ item.id }}">
+            ₹{{ item.Product.price|floatformat:2 }}
+          </p>
         </div>
       </div>
-        <div>
+    </div>
+    {% endfor %}
+
+    <!-- Cart Summary -->
+    <div class="row mt-5 ms-5 me-5 mb-5">
+      <div class="col-md-8"></div>
+      <div class="col-md-4">
+        <div class="cart-summary p-4" style="background-color: rgba(255, 255, 255, 0.05); border-radius: 15px; border: 2px solid #38bdf8;">
+          <h4 style="color: white; margin-bottom: 20px;">Cart Summary</h4>
+          
+          <div class="d-flex justify-content-between mb-2">
+            <p style="color: #ccc; margin: 0;">Subtotal:</p>
+            <p style="color: white; margin: 0;" id="subtotal">₹{{ subtotal|floatformat:2 }}</p>
+          </div>
+          
+          <div class="d-flex justify-content-between mb-2">
+            <p style="color: #ccc; margin: 0;">Shipping:</p>
+            <p style="color: white; margin: 0;" id="shipping">₹{{ shipping|floatformat:2 }}</p>
+          </div>
+          
+          <div class="d-flex justify-content-between mb-3">
+            <p style="color: #ccc; margin: 0;">Tax (5%):</p>
+            <p style="color: white; margin: 0;" id="tax">₹{{ tax|floatformat:2 }}</p>
+          </div>
+          
+          <hr style="border-color: #38bdf8;">
+          
+          <div class="d-flex justify-content-between mb-4">
+            <h5 style="color: white; margin: 0;">Total:</h5>
+            <h5 style="color: #38bdf8; margin: 0;" id="total">₹{{ total|floatformat:2 }}</h5>
+          </div>
+          
+          <a href="{% url 'checkout' %}">
+            <button class="check-payment-but w-100">Proceed to Checkout</button>
+          </a>
+          
+          <a href="{% url 'shop' %}">
+            <button class="cart-remove-btn w-100 mt-2" style="background-color: #6c757d;">Continue Shopping</button>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="text-center mt-5 mb-5" style="min-height: 50vh;">
+      <img src="{% static 'assets/images/logo/cart.svg' %}" alt="empty cart" width="150" height="150" style="opacity: 0.3;">
+      <h3 style="color: white; margin-top: 30px;">Your cart is empty</h3>
+      <p style="color: #ccc;">Add some items to get started!</p>
+      <a href="{% url 'shop' %}">
+        <button class="log-button px-5 py-2 mt-3">Start Shopping</button>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!----------------------------------- Modal ----------------------------------------------->
+  <div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body" id="modalMessage">
+          message
         </div>
       </div>
     </div>
   </div>
+
+  <!----------------------------------- JavaScript ----------------------------------------------->
+  <script>
+    function getCSRF() {
+      return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    function showModal(msg) {
+      document.getElementById('modalMessage').innerText = msg;
+      const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+      modal.show();
+      setTimeout(() => {
+        modal.hide();
+      }, 2000);
+    }
+
+    // Update cart quantity
+    function updateQuantity(cartId, action) {
+      fetch("{% url 'update_cart_quantity' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': getCSRF()
+        },
+        body: `cart_id=${cartId}&action=${action}`
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Update quantity display
+          document.getElementById(`qty-${cartId}`).innerText = data.qty;
+          
+          // Update item total
+          document.getElementById(`item-total-${cartId}`).innerText = '₹' + data.item_total;
+          
+          // Update cart summary
+          document.getElementById('subtotal').innerText = '₹' + data.subtotal;
+          document.getElementById('shipping').innerText = '₹' + data.shipping;
+          document.getElementById('tax').innerText = '₹' + data.tax;
+          document.getElementById('total').innerText = '₹' + data.total;
+        } else if (data.status === 'removed') {
+          // Item was removed (qty went to 0)
+          document.getElementById(`cart-item-${cartId}`).remove();
+          showModal(data.message);
+          
+          // Reload page if cart is now empty
+          setTimeout(() => {
+            location.reload();
+          }, 2000);
+        } else {
+          showModal(data.message);
+        }
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        showModal('Something went wrong!');
+      });
+    }
+
+    // Remove item from cart
+    function removeFromCart(cartId) {
+      if (!confirm('Are you sure you want to remove this item?')) {
+        return;
+      }
+
+      fetch("{% url 'remove_from_cart' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': getCSRF()
+        },
+        body: `cart_id=${cartId}`
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Remove item from DOM
+          document.getElementById(`cart-item-${cartId}`).remove();
+          
+          showModal(data.message);
+          
+          // Update cart summary
+          document.getElementById('subtotal').innerText = '₹' + data.subtotal;
+          document.getElementById('shipping').innerText = '₹' + data.shipping;
+          document.getElementById('tax').innerText = '₹' + data.tax;
+          document.getElementById('total').innerText = '₹' + data.total;
+          
+          // Reload if cart is empty
+          if (data.item_count === 0) {
+            setTimeout(() => {
+              location.reload();
+            }, 2000);
+          }
+        } else {
+          showModal(data.message);
+        }
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        showModal('Something went wrong!');
+      });
+    }
+  </script>
+
+  {% csrf_token %}
 </body>
+
 </html>
 
 {% endblock %}

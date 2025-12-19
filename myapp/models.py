@@ -24,12 +24,16 @@ class User(models.Model):
         return self.user
      
 class Cart(models.Model):
-    Product=models.ForeignKey(Product,on_delete=models.CASCADE)
-    customer=models.ForeignKey(User, on_delete=models.CASCADE)
-    qty=models.IntegerField(default=1)
+    Product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    qty = models.IntegerField(default=1)
+
+    def item_total(self):
+        return self.Product.price * self.qty
 
     def __str__(self):
-        return f"{self.user}-{self.name}"
+        return f"{self.customer.username} - {self.Product.name}"
+
     
 
 class EmailOtp(models.Model):

@@ -284,8 +284,160 @@ def switch_account(req, user_id):
     return redirect('profile')
 
 # =====================================cart=====================================================
+
+def add_to_cart(req, product_id):
+    if req.method == 'POST':
+        # Check if user is logged in
+        user_id = req.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'status': 'error', 'message': 'Please login first'})
+        
+        try:
+            user = User.objects.get(id=user_id)
+            product = Product.objects.get(id=product_id)
+            
+            # Check if item already in cart
+            cart_item = Cart.objects.filter(customer=user, Product=product).first()
+            
+            if cart_item:
+                # Item exists, increase quantity
+                cart_item.qty += 1
+                cart_item.save()
+                message = 'Quantity updated in cart'
+            else:
+                # New item, create cart entry
+                Cart.objects.create(customer=user, Product=product, qty=1)
+                message = 'Added to cart'
+            
+            # Get total cart count
+            cart_count = Cart.objects.filter(customer=user).count()
+            
+            return JsonResponse({
+                'status': 'success', 
+                'message': message,
+                'cart_count': cart_count
+            })
+        
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
 def cart(req):
-    return render(req,'cart.html')
+    # Check if user is logged in
+    user_id = req.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+    
+    user = User.objects.get(id=user_id)
+    cart_items = Cart.objects.filter(customer=user).select_related('Product')
+    
+    # Calculate totals
+    subtotal = sum(float(item.Product.price) * item.qty for item in cart_items)
+    shipping = 50.00 if subtotal > 0 else 0  # Flat shipping rate
+    tax = subtotal * 0.05  # 5% tax
+    total = subtotal + shipping + tax
+    
+    return render(req, 'cart.html', {
+        'cart_items': cart_items,
+        'subtotal': subtotal,
+        'shipping': shipping,
+        'tax': tax,
+        'total': total,
+        'item_count': cart_items.count()
+    })
+
+
+def update_cart_quantity(req):
+    if req.method == 'POST':
+        user_id = req.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'status': 'error', 'message': 'Please login first'})
+        
+        try:
+            cart_id = req.POST.get('cart_id')
+            action = req.POST.get('action')  # 'increase' or 'decrease'
+            
+            cart_item = Cart.objects.get(id=cart_id)
+            
+            if action == 'increase':
+                cart_item.qty += 1
+                cart_item.save()
+            elif action == 'decrease':
+                if cart_item.qty > 1:
+                    cart_item.qty -= 1
+                    cart_item.save()
+                else:
+                    # If quantity is 1 and user clicks decrease, remove item
+                    cart_item.delete()
+                    return JsonResponse({
+                        'status': 'removed',
+                        'message': 'Item removed from cart'
+                    })
+            
+            # Calculate new item total
+            item_total = float(cart_item.Product.price) * cart_item.qty
+            
+            # Calculate new cart totals
+            user = User.objects.get(id=user_id)
+            cart_items = Cart.objects.filter(customer=user)
+            subtotal = sum(float(item.Product.price) * item.qty for item in cart_items)
+            shipping = 50.00 if subtotal > 0 else 0
+            tax = subtotal * 0.05
+            total = subtotal + shipping + tax
+            
+            return JsonResponse({
+                'status': 'success',
+                'qty': cart_item.qty,
+                'item_total': round(item_total, 2),
+                'subtotal': round(subtotal, 2),
+                'shipping': round(shipping, 2),
+                'tax': round(tax, 2),
+                'total': round(total, 2)
+            })
+        
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+def remove_from_cart(req):
+    if req.method == 'POST':
+        user_id = req.session.get('user_id')
+        if not user_id:
+            return JsonResponse({'status': 'error', 'message': 'Please login first'})
+        
+        try:
+            cart_id = req.POST.get('cart_id')
+            cart_item = Cart.objects.get(id=cart_id)
+            cart_item.delete()
+            
+            # Calculate new cart totals
+            user = User.objects.get(id=user_id)
+            cart_items = Cart.objects.filter(customer=user)
+            subtotal = sum(float(item.Product.price) * item.qty for item in cart_items)
+            shipping = 50.00 if subtotal > 0 else 0
+            tax = subtotal * 0.05
+            total = subtotal + shipping + tax
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Item removed from cart',
+                'subtotal': round(subtotal, 2),
+                'shipping': round(shipping, 2),
+                'tax': round(tax, 2),
+                'total': round(total, 2),
+                'item_count': cart_items.count()
+            })
+        
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+#==============================================================checkout========================================================#
 
 def checkout(req):
     return render(req,'checkout.html')
@@ -296,3 +448,8 @@ def order_summary(req):
 
 def product_details(req):
     return render(req,'product_details.html')
+
+
+def shop(req):
+    result=Product.objects.all()
+    return render(req,'shop.html',{'result':result})
