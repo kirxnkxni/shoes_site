@@ -46,7 +46,9 @@
                 <button class="profile-edit" style="padding-left:30px; padding-right: 30px;" onclick="alert('Settings coming soon!')">Settings</button>
             </div> -->
             <div class="mt-2 d-flex justify-content-center">
-                <button class="profile-edit" style="padding-left: 15px; padding-right: 15px;" onclick="alert('Add account coming soon!')">add account</button>
+                <a href="{% url 'add_account' %}">
+                    <button class="profile-edit" style="padding-left: 15px; padding-right: 15px;">add account</button>
+                </a>
             </div>
             <div class="mt-2 mb-5 d-flex justify-content-center">
                 <a href="{% url 'logout' %}">

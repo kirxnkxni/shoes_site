@@ -18,6 +18,7 @@ urlpatterns = [
     path('checkout/',views.checkout,name='checkout'),
     path('order_summary/',views.order_summary,name='order_summary'),
     path('profile/',views.profile,name='profile'),
-    path('edit_profile/',views.edit_profile,name='edit_profile'), 
+    path('edit_profile/',views.edit_profile,name='edit_profile'),
+    path('add_account/',views.add_account,name='add_account'),  
     path('product_details/',views.product_details,name='prod_details')
 ] 

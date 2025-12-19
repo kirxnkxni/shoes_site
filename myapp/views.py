@@ -261,6 +261,28 @@ def edit_profile(req):
         'profile': profile_obj
     })
 
+#===================================================================add account====================================================
+
+def add_account(req):
+    # Get current user if logged in
+    current_user_id = req.session.get('user_id')
+    current_user = None
+    if current_user_id:
+        current_user = User.objects.get(id=current_user_id)
+    
+    # Get all users for account switching (you might want to limit this to users who've logged in on this device)
+    all_users = User.objects.all()
+    
+    return render(req, 'add_account.html', {
+        'current_user': current_user,
+        'all_users': all_users
+    })
+
+def switch_account(req, user_id):
+    # Switch to different account
+    req.session['user_id'] = user_id
+    return redirect('profile')
+
 # =====================================cart=====================================================
 def cart(req):
     return render(req,'cart.html')
