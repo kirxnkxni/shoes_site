@@ -440,10 +440,102 @@ def remove_from_cart(req):
 #==============================================================checkout========================================================#
 
 def checkout(req):
-    return render(req,'checkout.html')
+    from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import User, Cart, Profile
+
+def checkout(request):
+    # user must be logged in
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+
+    user = User.objects.get(id=user_id)
+    profile, _ = Profile.objects.get_or_create(user=user)
+
+    cart_items = Cart.objects.filter(customer=user).select_related('Product')
+    if not cart_items.exists():
+        return redirect('cart')
+
+    # totals
+    subtotal = sum(float(item.Product.price) * item.qty for item in cart_items)
+    shipping = 50.00
+    tax = subtotal * 0.05
+    total = subtotal + shipping + tax
+
+    if request.method == "POST":
+        data = request.POST
+
+        required = [
+            'firstname','lastname','email','phone',
+            'city','state','zipcode','address'
+        ]
+
+        if not all(data.get(field) for field in required):
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Please fill all fields'
+            })
+
+        # save address to profile
+        profile.phone = data['phone']
+        profile.address = f"{data['address']}, {data['city']}, {data['state']} - {data['zipcode']}"
+        profile.save()
+
+        # store shipping info for next page
+        request.session['shipping_info'] = {
+            'firstname': data['firstname'],
+            'lastname': data['lastname'],
+            'email': data['email'],
+            'phone': data['phone'],
+            'address': profile.address
+        }
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Address saved'
+        })
+
+    return render(request, 'checkout.html', {
+        'user': user,
+        'profile': profile,
+        'cart_items': cart_items,
+        'subtotal': subtotal,
+        'shipping': shipping,
+        'tax': tax,
+        'total': total
+    })
+
+
+#=======================overview order=============================
+
+import uuid
 
 def order_summary(req):
-    return render(req,'order_summary.html')
+    user_id = req.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+
+    user = User.objects.get(id=user_id)
+    cart_items = Cart.objects.filter(customer=user).select_related('Product')
+
+    if not cart_items.exists():
+        return redirect('cart')
+
+    subtotal = sum(float(item.Product.price) * item.qty for item in cart_items)
+    shipping = 50
+    tax = subtotal * 0.05
+    total = subtotal + shipping + tax
+
+    # temporary order number
+    order_id = str(uuid.uuid4()).split('-')[0].upper()
+
+    return render(req, 'order_summary.html', {
+        'cart_items': cart_items,
+        'total': round(total, 2),
+        'order_id': order_id
+    })
+
 
 
 def product_details(req):

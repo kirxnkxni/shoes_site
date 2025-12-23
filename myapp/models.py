@@ -32,7 +32,7 @@ class Cart(models.Model):
         return self.Product.price * self.qty
 
     def __str__(self):
-        return f"{self.customer.username} - {self.Product.name}"
+        return f"{self.customer.user} - {self.Product.name}"
 
     
 

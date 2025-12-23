@@ -13,66 +13,80 @@
     <meta name="description"
         content="Shop the latest collection of stylish, comfortable, and affordable shoes online. Discover sneakers, formal shoes, sandals, and more with fast delivery and secure checkout." />
     <meta name="author" content="kiran k" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 
 <body class="order-back">
     <div class="order-sum m-5">
         <div class="mt-5">
-            <div class=" row d-flex justify-content-center">
-                <!-- IF STATEMENT -->
-                <img src="{% static 'assets\images\logo\order_tick.svg' %}" alt="confirmation" width="100" height="100"
-                    class="order-img">
+
+            <!-- Success Icon -->
+            <div class="row d-flex justify-content-center">
+                <img src="{% static 'assets/images/logo/order_tick.svg' %}"
+                     alt="confirmation" width="100" height="100"
+                     class="order-img">
             </div>
+
+            <!-- Message -->
             <div class="row justify-content-center order-sent">
                 thank you for your purchase
             </div>
+
             <div class="row mt-2">
-                <div class="d-flex justify-content-center"> we've recieved your order will ship in 5-7 buisness days
+                <div class="d-flex justify-content-center">
+                    we've recieved your order will ship in 5-7 buisness days
                 </div>
-                <div class="d-flex justify-content-center">your order number is
-                    <!-- <span>order number</span> -->
+                <div class="d-flex justify-content-center">
+                    your order number is <strong class="ms-1">{{ order_id }}</strong>
                 </div>
             </div>
-            <div class="row order-sum  mt-4 mb-5">
+
+            <!-- Order Summary -->
+            <div class="row order-sum mt-4 mb-5">
                 <div class="mt-4 mb-5">
-                   <h1 class="order-head ">Order Summary</h1> 
+                    <h1 class="order-head">Order Summary</h1>
                 </div>
 
-
-                <div class="row mb-3 ms-5 me-5">
+                <!-- Products -->
+                {% for item in cart_items %}
+                <div class="row mb-3 ms-5 me-5 align-items-center">
                     <div class="col-4">
-                        <img src="" alt="ordered product">
+                        <img src="{{ item.Product.image.url }}"
+                             alt="{{ item.Product.name }}"
+                             width="120"
+                             style="border-radius: 10px; object-fit: cover;">
                     </div>
+
                     <div class="col-6">
-                        <!-- product details -->
+                        <p class="mb-1"><strong>{{ item.Product.name }}</strong></p>
+                        <p class="mb-0">Qty: {{ item.qty }}</p>
+                        <p class="mb-0 text-muted">{{ item.Product.brand }}</p>
                     </div>
+
                     <div class="col-2">
-                        <!-- price -->
+                        ₹{{ item.Product.price|floatformat:2 }}
                     </div>
                 </div>
-                <div class="row mt-4 mb-5 " style="position: relative;">
-                    <div class="order-cart-border m-auto">
-                    </div>
+                {% endfor %}
+
+                <!-- Divider -->
+                <div class="row mt-4 mb-5" style="position: relative;">
+                    <div class="order-cart-border m-auto"></div>
                 </div>
 
-
-                <!-- underline for displaying total -->
-                <div class="row mt-4 mb-3 " style="position: relative;">
-                    <div class="order-cart-main-border m-auto">
-                    </div>
+                <!-- Total Divider -->
+                <div class="row mt-4 mb-3" style="position: relative;">
+                    <div class="order-cart-main-border m-auto"></div>
                 </div>
+
+                <!-- Total -->
                 <div class="row">
                     <div class="col-7 ms-5 check-total">
                         TOTAL
                     </div>
                     <div class="col-3">
-                        $800
+                        ₹{{ total|floatformat:2 }}
                     </div>
                 </div>
 
@@ -82,4 +96,5 @@
 </body>
 
 </html>
+
 {% endblock %}
