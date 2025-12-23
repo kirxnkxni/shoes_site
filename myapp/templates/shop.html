@@ -26,7 +26,9 @@
   {% for product in result %}
   <div class="col product" data-category="{{ product.category|lower }}">
     <div class="card h-100">
-      <img src="{{ product.image.url }}" class="card-img-top" alt="product" height="350">
+      <a href="{% url 'prod_details' product.id %}">
+        <img src="{{ product.image.url }}" class="card-img-top" alt="product" height="350">
+      </a>
       <div class="card-body">
         <h5 class="card-title">{{ product.name }}</h5>
         <h5>₹{{ product.price }}</h5>
@@ -39,6 +41,54 @@
   </div>
   {% endfor %}
 </div>
+<!-- pagination -->
+ <div class="d-flex justify-content-center mt-4">
+  <nav>
+    <ul class="pagination">
+
+      <!-- Previous -->
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+          Previous
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Previous</span>
+      </li>
+      {% endif %}
+
+      <!-- Page numbers -->
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+          </li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      <!-- Next -->
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+          Next
+        </a>
+      </li>
+      {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">Next</span>
+      </li>
+      {% endif %}
+
+    </ul>
+  </nav>
+</div>
+
 
 <script>
   const products = document.querySelectorAll(".product");

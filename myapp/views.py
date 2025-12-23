@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from.models import *
 from django.core.mail import send_mail
 from django.conf import settings
@@ -188,15 +188,12 @@ def signup(req):
 # =============================================profile=============================================================
 
 def profile(req):
-    # Check if user is logged in
     user_id = req.session.get('user_id')
     if not user_id:
         return redirect('login')
     
-    # Get user
     user = User.objects.get(id=user_id)
     
-    # Get or create profile
     profile_obj, created = Profile.objects.get_or_create(user=user)
     
     return render(req, 'profile.html', {
@@ -208,13 +205,12 @@ def profile(req):
 #===================================logout=============================================
 
 def logout(req):
-    req.session.flush()  # Clear all session data
+    req.session.flush()
     return redirect('login')
 
 #===========================================================edit_profile===============================================================
 
 def edit_profile(req):
-    # Check if user is logged in
     user_id = req.session.get('user_id')
     if not user_id:
         return redirect('login')
@@ -224,7 +220,6 @@ def edit_profile(req):
     
     if req.method == 'POST':
         try:
-            # Get form data
             full_name = req.POST.get('fullname')
             gender = req.POST.get('gender')
             age = req.POST.get('age')
@@ -264,13 +259,10 @@ def edit_profile(req):
 #===================================================================add account====================================================
 
 def add_account(req):
-    # Get current user if logged in
     current_user_id = req.session.get('user_id')
     current_user = None
     if current_user_id:
         current_user = User.objects.get(id=current_user_id)
-    
-    # Get all users for account switching (you might want to limit this to users who've logged in on this device)
     all_users = User.objects.all()
     
     return render(req, 'add_account.html', {
@@ -287,7 +279,6 @@ def switch_account(req, user_id):
 
 def add_to_cart(req, product_id):
     if req.method == 'POST':
-        # Check if user is logged in
         user_id = req.session.get('user_id')
         if not user_id:
             return JsonResponse({'status': 'error', 'message': 'Please login first'})
@@ -295,21 +286,17 @@ def add_to_cart(req, product_id):
         try:
             user = User.objects.get(id=user_id)
             product = Product.objects.get(id=product_id)
-            
-            # Check if item already in cart
+
             cart_item = Cart.objects.filter(customer=user, Product=product).first()
             
             if cart_item:
-                # Item exists, increase quantity
                 cart_item.qty += 1
                 cart_item.save()
                 message = 'Quantity updated in cart'
             else:
-                # New item, create cart entry
                 Cart.objects.create(customer=user, Product=product, qty=1)
                 message = 'Added to cart'
-            
-            # Get total cart count
+
             cart_count = Cart.objects.filter(customer=user).count()
             
             return JsonResponse({
@@ -325,18 +312,16 @@ def add_to_cart(req, product_id):
 
 
 def cart(req):
-    # Check if user is logged in
     user_id = req.session.get('user_id')
     if not user_id:
         return redirect('login')
     
     user = User.objects.get(id=user_id)
     cart_items = Cart.objects.filter(customer=user).select_related('Product')
-    
-    # Calculate totals
+
     subtotal = sum(float(item.Product.price) * item.qty for item in cart_items)
-    shipping = 50.00 if subtotal > 0 else 0  # Flat shipping rate
-    tax = subtotal * 0.05  # 5% tax
+    shipping = 50.00 if subtotal > 0 else 0 
+    tax = subtotal * 0.05  
     total = subtotal + shipping + tax
     
     return render(req, 'cart.html', {
@@ -357,7 +342,7 @@ def update_cart_quantity(req):
         
         try:
             cart_id = req.POST.get('cart_id')
-            action = req.POST.get('action')  # 'increase' or 'decrease'
+            action = req.POST.get('action')
             
             cart_item = Cart.objects.get(id=cart_id)
             
@@ -369,14 +354,12 @@ def update_cart_quantity(req):
                     cart_item.qty -= 1
                     cart_item.save()
                 else:
-                    # If quantity is 1 and user clicks decrease, remove item
                     cart_item.delete()
                     return JsonResponse({
                         'status': 'removed',
                         'message': 'Item removed from cart'
                     })
-            
-            # Calculate new item total
+
             item_total = float(cart_item.Product.price) * cart_item.qty
             
             # Calculate new cart totals
@@ -414,7 +397,7 @@ def remove_from_cart(req):
             cart_item = Cart.objects.get(id=cart_id)
             cart_item.delete()
             
-            # Calculate new cart totals
+            # new cart totals
             user = User.objects.get(id=user_id)
             cart_items = Cart.objects.filter(customer=user)
             subtotal = sum(float(item.Product.price) * item.qty for item in cart_items)
@@ -445,7 +428,6 @@ from django.http import JsonResponse
 from .models import User, Cart, Profile
 
 def checkout(request):
-    # user must be logged in
     user_id = request.session.get('user_id')
     if not user_id:
         return redirect('login')
@@ -527,7 +509,6 @@ def order_summary(req):
     tax = subtotal * 0.05
     total = subtotal + shipping + tax
 
-    # temporary order number
     order_id = str(uuid.uuid4()).split('-')[0].upper()
 
     return render(req, 'order_summary.html', {
@@ -536,12 +517,33 @@ def order_summary(req):
         'order_id': order_id
     })
 
+#================================================product details and shop=================================================
+
+def product_details(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    sizes = ["6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"]
+
+    return render(request, 'product_details.html', {
+        'product': product,
+        'sizes': sizes
+    })
 
 
-def product_details(req):
-    return render(req,'product_details.html')
 
+#=================================================shop=================================================
+
+
+from django.core.paginator import Paginator
 
 def shop(req):
-    result=Product.objects.all()
-    return render(req,'shop.html',{'result':result})
+    product_list = Product.objects.all().order_by('id') 
+    paginator = Paginator(product_list, 8) 
+
+    page_number = req.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(req, 'shop.html', {
+        'result': page_obj,     
+        'page_obj': page_obj
+    })

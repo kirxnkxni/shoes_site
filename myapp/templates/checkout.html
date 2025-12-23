@@ -45,10 +45,11 @@
         <div class="mb-4">
           <textarea class="form-control" name="address" rows="3" placeholder="Full address">{{ profile.address }}</textarea>
         </div>
-
+        <a href="{% url 'order_summary' %}">
         <button class="btn btn-primary w-100" type="submit">
           Continue to Payment
         </button>
+        </a>
       </form>
     </div>
 
