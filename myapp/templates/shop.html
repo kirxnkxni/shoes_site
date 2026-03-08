@@ -32,24 +32,27 @@
       <div class="card-body">
         <h5 class="card-title">{{ product.name }}</h5>
         <h5>₹{{ product.price }}</h5>
-        <button onclick="addToCart('{{ product.id }}')"
-                class="btn btn-primary w-100 mt-2">
+        <button onclick="addToCart('{{ product.id }}')" class="btn btn-primary w-100 mt-2">
           Add to Cart
         </button>
       </div>
     </div>
   </div>
+  {% empty %}
+  <div class="text-center mt-5">
+    <h4>No products found</h4>
+  </div>
   {% endfor %}
 </div>
 <!-- pagination -->
- <div class="d-flex justify-content-center mt-4">
+<div class="d-flex justify-content-center mt-4">
   <nav>
     <ul class="pagination">
 
       <!-- Previous -->
       {% if page_obj.has_previous %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+        <a class="page-link" href="?q={{query}}&page={{ page_obj.previous_page_number }}">
           Previous
         </a>
       </li>
@@ -61,21 +64,21 @@
 
       <!-- Page numbers -->
       {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-          <li class="page-item active">
-            <span class="page-link">{{ num }}</span>
-          </li>
-        {% else %}
-          <li class="page-item">
-            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-          </li>
-        {% endif %}
+      {% if page_obj.number == num %}
+      <li class="page-item active">
+        <span class="page-link">{{ num }}</span>
+      </li>
+      {% else %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{query}}&page={{ num }}">{{ num }}</a>
+      </li>
+      {% endif %}
       {% endfor %}
 
       <!-- Next -->
       {% if page_obj.has_next %}
       <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+        <a class="page-link" href="?q={{query}}&page={{ page_obj.next_page_number }}">
           Next
         </a>
       </li>
@@ -111,21 +114,21 @@
         'X-CSRFToken': getCSRF()
       }
     })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === 'success') {
-        alert(data.message);
-      } else if (data.status === 'error' && data.message === 'Please login first') {
-        alert('Please login to add items to cart');
-        window.location.href = "{% url 'login' %}";
-      } else {
-        alert(data.message);
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert('Something went wrong!');
-    });
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert(data.message);
+        } else if (data.status === 'error' && data.message === 'Please login first') {
+          alert('Please login to add items to cart');
+          window.location.href = "{% url 'login' %}";
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Something went wrong!');
+      });
   }
 </script>
 

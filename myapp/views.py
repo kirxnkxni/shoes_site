@@ -534,16 +534,34 @@ def product_details(request, product_id):
 #=================================================shop=================================================
 
 
+from django.db.models import Q
 from django.core.paginator import Paginator
 
 def shop(req):
-    product_list = Product.objects.all().order_by('id') 
-    paginator = Paginator(product_list, 8) 
+
+    query = req.GET.get('q')
+
+    if query:
+        product_list = Product.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query) |
+            Q(brand__icontains=query) |
+            Q(category__icontains=query) |
+            Q(type__icontains=query)
+        ).order_by('id')
+    else:
+        product_list = Product.objects.all().order_by('id')
+
+    paginator = Paginator(product_list, 8)
 
     page_number = req.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(req, 'shop.html', {
-        'result': page_obj,     
-        'page_obj': page_obj
+        'result': page_obj,
+        'page_obj': page_obj,
+        'query': query
     })
+
+
+#=================================================search=================================================
